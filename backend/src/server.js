@@ -55,8 +55,9 @@ app.use(express.json());
 app.use("/api/ai", aiRoutes);
 
 // Health Check
-app.get("/", (req, res) => {
-  res.json({
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
     message: "AI Developer Toolbox API is running",
   });
 });
