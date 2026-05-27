@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+// import cors from "cors";
 // import path from "path";
 // import { fileURLToPath } from "url";
 
@@ -20,7 +21,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://ai-developer-toolbox-czp6.vercel.app",
+    ],
+  })
+);
 app.use(express.json());
 
 // Routes
@@ -36,32 +44,3 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-// asdfdvsdvcds
-// import express from "express";
-// import cors from "cors";
-
-// import aiRoutes from "./routes/aiRoutes.js";
-
-// const app = express();
-
-// const PORT = process.env.PORT || 5000;
-
-// // Middleware
-// app.use(cors());
-// app.use(express.json());
-
-// // Routes
-// app.use("/api/ai", aiRoutes);
-
-// // Health Check
-// app.get("/health", (req, res) => {
-//   res.status(200).json({
-//     status: "ok",
-//     message: "AI Developer Toolbox API is running",
-//   });
-// });
-
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
