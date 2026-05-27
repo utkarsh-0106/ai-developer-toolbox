@@ -24,9 +24,10 @@ const PORT = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",
-      "https://ai-developer-toolbox-czp6.vercel.app",
-    ],
+  "http://localhost:5173",
+  "https://ai-developer-toolbox-czp6.vercel.app",
+  "https://ai-developer-toolbox-mnwa.vercel.app",
+],
   })
 );
 app.use(express.json());

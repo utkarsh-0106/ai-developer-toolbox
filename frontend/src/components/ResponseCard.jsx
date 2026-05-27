@@ -98,20 +98,20 @@ function ResponseCard({ response, darkMode }) {
       {/* Response Body */}
       <div className="p-6 md:p-8">
         <div
-          className={`rounded-2xl p-6 border ${
-            darkMode
-              ? "bg-gray-950 border-gray-800"
-              : "bg-gray-50 border-gray-200"
-          }`}
-        >
-          <pre
-            className={`whitespace-pre-wrap font-sans leading-8 text-[15px] ${
-              darkMode ? "text-gray-200" : "text-gray-700"
-            }`}
-          >
-            {response}
-          </pre>
-        </div>
+  className={`rounded-2xl p-8 border backdrop-blur-sm ${
+    darkMode
+      ? "bg-black/40 border-gray-800"
+      : "bg-gray-50 border-gray-200"
+  }`}
+>
+  <pre
+    className={`whitespace-pre-wrap font-sans leading-8 text-[15px] md:text-[16px] ${
+      darkMode ? "text-gray-200" : "text-gray-700"
+    }`}
+  >
+    {response}
+  </pre>
+</div>
       </div>
     </div>
   );

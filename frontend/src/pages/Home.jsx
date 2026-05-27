@@ -36,7 +36,7 @@ function Home() {
       className={`min-h-screen transition-all duration-300 ${
         darkMode
           ? "bg-gray-950"
-          : "bg-gradient-to-br from-blue-50 via-white to-indigo-100"
+          : "bg-linear-to-br from-blue-50 via-white to-indigo-100"
       }`}
     >
       <div className="max-w-5xl mx-auto px-4 py-10">
@@ -48,7 +48,7 @@ function Home() {
                 darkMode ? "text-white" : "text-gray-900"
               }`}
             >
-              <span className="bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
                     AI Developer Toolbox
                 </span>
             </h1>
