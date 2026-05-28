@@ -1,29 +1,47 @@
-// const API_BASE_URL = "http://localhost:5000";
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const generateAIResponse = async (prompt) => {
+export async function generateAIResponse(prompt) {
   try {
     const response = await fetch(`${API_BASE_URL}/api/ai`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        prompt,
-      }),
+      body: JSON.stringify({ prompt }),
     });
+
+    if (!response.ok) {
+      throw new Error("Backend request failed");
+    }
 
     const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || "Something went wrong");
-    }
-
     return data.response;
   } catch (error) {
-    console.error("API Error:", error);
+    console.error("Fetch Error:", error);
 
-    throw error;
+    return `
+## Mock AI Response
+
+You asked:
+
+"${prompt}"
+
+--------------------------------------------------
+
+## Suggested Debugging Steps
+
+1. Check console errors carefully
+2. Verify variable names
+3. Inspect API responses
+4. Use console.log strategically
+5. Test isolated components
+
+--------------------------------------------------
+
+## Engineering Tip
+
+Strong engineers debug systematically instead of guessing.
+`;
   }
-};
+}
