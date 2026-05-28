@@ -12,8 +12,10 @@ if (env.OPENAI_API_KEY) {
 
 export const generateAIResponse = async (prompt) => {
   try {
-    // If OpenAI is not configured, return mock response
+    // If OpenAI is not configured, use mock response
     if (!openai) {
+      console.log("Using mock response because API key is missing.");
+
       return getMockResponse(prompt);
     }
 
@@ -37,17 +39,18 @@ export const generateAIResponse = async (prompt) => {
   } catch (error) {
     console.error(
       "OpenAI Service Error:",
-      error.response?.data || error.message || error
+      error.message || error
     );
 
-    // Fallback to mock response if API fails
+    // Fallback if OpenAI fails
     return getMockResponse(prompt);
   }
 };
 
-// Mock AI responses
+// Mock AI response fallback
 const getMockResponse = (prompt) => {
-  console.log("NEW MOCK RESPONSE ACTIVE");
+  console.log("MOCK AI RESPONSE ACTIVE");
+
   return `
 ## Problem Analysis
 
@@ -97,12 +100,3 @@ Strong engineers debug systematically:
 Avoid random guessing while debugging complex applications.
 `;
 };
-// jhjvg
-// export const generateAIResponse = async () => {
-//   return `
-// THIS IS THE NEW MOCK RESPONSE
-
-// IF YOU SEE THIS:
-// BACKEND UPDATED SUCCESSFULLY.
-// `;
-// };
