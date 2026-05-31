@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import PromptForm from "../components/PromptForm";
 import ResponseCard from "../components/ResponseCard";
 
-import { generateAIResponse } from "../services/api";
+import { getAIResponse } from "../services/api";
 
 function Home() {
   const [response, setResponse] = useState("");
@@ -17,9 +18,9 @@ function Home() {
       setError("");
       setResponse("");
 
-      const aiResponse = await generateAIResponse(prompt);
+      const aiResponse = await getAIResponse(prompt);
 
-      setResponse(aiResponse);
+      setResponse(aiResponse.response);
     } catch (error) {
       setError(error.message || "Something went wrong");
     } finally {
@@ -40,6 +41,16 @@ function Home() {
       }`}
     >
       <div className="max-w-5xl mx-auto px-4 py-10">
+        {/* History Link */}
+        <div className="mb-6">
+          <Link
+            to="/history"
+            className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+          >
+            View History
+          </Link>
+        </div>
+
         {/* Top Bar */}
         <div className="flex justify-between items-center mb-16">
           <div>
@@ -49,8 +60,8 @@ function Home() {
               }`}
             >
               <span className="bg-linear-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
-                    AI Developer Toolbox
-                </span>
+                AI Developer Toolbox
+              </span>
             </h1>
 
             <p

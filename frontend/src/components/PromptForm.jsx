@@ -76,7 +76,7 @@ function PromptForm({ onSubmit, loading, darkMode }) {
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-semibold shadow-lg shadow-blue-500/20 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
+              className="px-8 py-4 rounded-2xl bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-semibold shadow-lg shadow-blue-500/20 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
             >
               {loading ? "Thinking..." : "Ask AI"}
             </button>

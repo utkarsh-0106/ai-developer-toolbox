@@ -1,8 +1,15 @@
 import express from "express";
-import { generateResponse } from "../controllers/aiController.js";
+
+import {
+  generateResponse,
+  getHistory,
+  deleteHistoryItem,
+} from "../controllers/aiController.js";
 
 const router = express.Router();
 
-router.post("/", generateResponse);
+router.post("/ask", generateResponse);
+router.get("/history", getHistory);
+// router.delete("/history/:id", deleteHistoryItem);
 
 export default router;

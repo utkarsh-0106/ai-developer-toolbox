@@ -1,47 +1,39 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-export async function generateAIResponse(prompt) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/ai`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt }),
-    });
+export const getHistory = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/ai/history`);
 
-    if (!response.ok) {
-      throw new Error("Backend request failed");
-    }
-
-    const data = await response.json();
-
-    return data.response;
-  } catch (error) {
-    console.error("Fetch Error:", error);
-
-    return `
-## Mock AI Response
-
-You asked:
-
-"${prompt}"
-
---------------------------------------------------
-
-## Suggested Debugging Steps
-
-1. Check console errors carefully
-2. Verify variable names
-3. Inspect API responses
-4. Use console.log strategically
-5. Test isolated components
-
---------------------------------------------------
-
-## Engineering Tip
-
-Strong engineers debug systematically instead of guessing.
-`;
+  if (!response.ok) {
+    throw new Error("Failed to fetch history");
   }
-}
+
+  return response.json();
+};
+
+export const getAIResponse = async (prompt) => {
+  const response = await fetch(`${API_BASE_URL}/api/ai/ask`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ prompt }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to get AI response");
+  }
+
+  return response.json();
+};
+
+export const deleteHistoryItem = async (id) => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/ai/history/${id}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  return response.json();
+};

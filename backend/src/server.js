@@ -1,15 +1,5 @@
 import dotenv from "dotenv";
-// import cors from "cors";
-// import path from "path";
-// import { fileURLToPath } from "url";
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-
-// dotenv.config({
-//   path: path.resolve(__dirname, "../.env"),
-// });
-// import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
@@ -42,6 +32,9 @@ app.get("/", (req, res) => {
   });
 });
 
+import connectDB from "./config/db.js";
+
+connectDB();
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
