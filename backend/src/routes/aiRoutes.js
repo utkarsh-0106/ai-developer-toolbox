@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.post("/ask", generateResponse);
 router.get("/history", getHistory);
-// router.delete("/history/:id", deleteHistoryItem);
+router.delete("/history/:id", deleteHistoryItem);
 
 export default router;
