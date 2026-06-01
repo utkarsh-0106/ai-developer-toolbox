@@ -16,6 +16,7 @@ app.use(
     origin: [
   "http://localhost:5173",
   "https://ai-dev-database-y44d0duxh-utkarsh-0106s-projects.vercel.app",
+  "https://ai-developer-toolbox-gr95.vercel.app/",
 ],
   })
 );
