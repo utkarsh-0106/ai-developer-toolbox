@@ -18,6 +18,7 @@ app.use(
   // "https://ai-developer-toolbox-czp6.vercel.app",
   // "https://ai-developer-toolbox-mnwa.vercel.app",
   "https://ai-dev-database.vercel.app/",
+  "https://ai-dev-database-y44d0duxh-utkarsh-0106s-projects.vercel.app",
 ],
   })
 );
