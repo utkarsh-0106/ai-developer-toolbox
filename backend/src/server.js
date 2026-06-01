@@ -14,11 +14,11 @@ const PORT = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-  "http://localhost:5173",
-  "https://ai-dev-database-y44d0duxh-utkarsh-0106s-projects.vercel.app",
-  "https://ai-developer-toolbox-gr95-fp8a42btq-utkarsh-0106s-projects.vercel.app",
-  "https://ai-developer-toolbox-c3ud.vercel.app/",
-],
+      "http://localhost:5173",
+      "https://ai-developer-toolbox-c3ud.vercel.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   })
 );
 app.use(express.json());
