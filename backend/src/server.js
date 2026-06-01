@@ -15,8 +15,9 @@ app.use(
   cors({
     origin: [
   "http://localhost:5173",
-  "https://ai-developer-toolbox-czp6.vercel.app",
-  "https://ai-developer-toolbox-mnwa.vercel.app",
+  // "https://ai-developer-toolbox-czp6.vercel.app",
+  // "https://ai-developer-toolbox-mnwa.vercel.app",
+  "https://ai-dev-database.vercel.app/",
 ],
   })
 );
