@@ -18,6 +18,12 @@ https://ai-developer-toolbox-6.onrender.com
 
 ---
 
+# 🎬 Project Demo
+
+[▶️ Watch the 20-second project demo](https://portfolio-dqyw-opal.vercel.app/videos/ai-developer-toolbox.mp4)
+
+---
+
 # Features
 
 ### AI-Powered Debugging Assistant
