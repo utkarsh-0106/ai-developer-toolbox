@@ -1,32 +1,21 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
 import PromptForm from "../components/PromptForm";
 import ResponseCard from "../components/ResponseCard";
-
 import { getAIResponse } from "../services/api";
-
-const QUICK_PROMPTS = [
-  { label: "Debug React error", prompt: "Debug this React error: " },
-  { label: "Explain this code", prompt: "Explain what this code does: " },
-  { label: "Optimize SQL query", prompt: "Optimize this SQL query: " },
-  { label: "Review my API", prompt: "Review this API design: " },
-];
 
 function Home() {
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [darkMode, setDarkMode] = useState(false);
-  const [prompt, setPrompt] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!prompt.trim()) return;
-
+  const handleSubmit = async (prompt) => {
     try {
       setLoading(true);
       setError("");
+      setResponse("");
+
       const aiResponse = await getAIResponse(prompt);
       setResponse(aiResponse.response);
     } catch (err) {
@@ -36,111 +25,132 @@ function Home() {
     }
   };
 
-  const handleQuickPrompt = (template) => {
-    setPrompt(template);
-  };
-
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev);
-  };
-
   return (
     <div
-      className={`min-h-screen transition-all duration-300 ${
-        darkMode
-          ? "bg-gray-950"
-          : "bg-linear-to-br from-blue-100 via-indigo-100 to-violet-100"
+      className={`min-h-screen ${
+        darkMode ? "bg-[#0b0d10] text-white" : "bg-[#f6f7f9] text-[#111318]"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-        {/* Header */}
-        <header className="mb-10 md:mb-14">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-            <div>
-              <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium tracking-wide ${
-                  darkMode
-                    ? "bg-indigo-900/50 text-indigo-200 border border-indigo-800"
-                    : "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                }`}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2 animate-pulse" />
-                AI-POWERED DEVELOPER ASSISTANT
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                to="/history"
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                  darkMode
-                    ? "bg-gray-800 hover:bg-gray-700 text-white border border-gray-700"
-                    : "bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 shadow-sm"
-                }`}
-              >
-                View History
-              </Link>
-              <button
-                onClick={toggleDarkMode}
-                className={`p-2 rounded-lg transition-all ${
-                  darkMode
-                    ? "bg-gray-800 hover:bg-gray-700 text-white"
-                    : "bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-sm"
-                }`}
-                aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-              >
-                {darkMode ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                )}
-              </button>
-            </div>
-          </div>
+      <header
+        className={`border-b ${
+          darkMode
+            ? "border-white/10 bg-[#0b0d10]"
+            : "border-black/10 bg-white"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link
+            to="/"
+            className="text-lg font-semibold tracking-tight"
+          >
+            AI Developer Toolbox
+          </Link>
 
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">
-              <span className="bg-linear-to-r from-indigo-600 via-blue-600 to-violet-600 bg-clip-text text-transparent">
-                AI Developer Toolbox
-              </span>
-            </h1>
-            <p className={`mt-4 text-lg md:text-xl ${darkMode ? "text-gray-400" : "text-gray-600"} leading-relaxed`}>
-              Debug smarter. Build faster. An AI workspace designed for developers who demand precision.
-            </p>
-          </div>
-        </header>
+          <nav className="flex items-center gap-5 text-sm">
+            <Link
+              to="/history"
+              className={`hover:underline underline-offset-4 ${
+                darkMode ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
+              History
+            </Link>
 
-        {/* Main Workspace */}
-        <main>
-          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
-            {/* Input Panel */}
-            <div className="lg:pr-2">
-              <PromptForm
-                onSubmit={handleSubmit}
-                loading={loading}
-                darkMode={darkMode}
-                prompt={prompt}
-                setPrompt={setPrompt}
-                quickPrompts={QUICK_PROMPTS}
-                onQuickPrompt={handleQuickPrompt}
-              />
-            </div>
+            <button
+              type="button"
+              onClick={() => setDarkMode((value) => !value)}
+              className={`border px-3 py-2 text-sm font-medium transition-colors ${
+                darkMode
+                  ? "border-white/15 text-gray-200 hover:bg-white/5"
+                  : "border-black/10 text-gray-700 hover:bg-black/[0.03]"
+              }`}
+            >
+              {darkMode ? "Light" : "Dark"}
+            </button>
+          </nav>
+        </div>
+      </header>
 
-            {/* Response Panel */}
-            <div className="lg:pl-2">
-              <ResponseCard
-                response={response}
-                loading={loading}
-                error={error}
-                darkMode={darkMode}
-              />
-            </div>
+      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
+        <section className="max-w-3xl mb-12">
+          <p
+            className={`text-xs font-semibold uppercase tracking-[0.18em] mb-4 ${
+              darkMode ? "text-gray-500" : "text-gray-500"
+            }`}
+          >
+            Developer productivity
+          </p>
+
+          <h1
+            className={`text-4xl md:text-5xl lg:text-6xl font-semibold tracking-[-0.04em] leading-[1.05] ${
+              darkMode ? "text-white" : "text-[#111318]"
+            }`}
+          >
+            Debug, explain, and review software problems.
+          </h1>
+
+          <p
+            className={`mt-5 max-w-2xl text-base md:text-lg leading-7 ${
+              darkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            A focused workspace for developers. Submit an error, coding
+            question, API problem, or engineering issue and get a structured
+            technical response.
+          </p>
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-6 items-start">
+          <PromptForm
+            onSubmit={handleSubmit}
+            loading={loading}
+            darkMode={darkMode}
+          />
+
+          <ResponseCard
+            response={response}
+            darkMode={darkMode}
+          />
+        </section>
+
+        {error && (
+          <div
+            className={`mt-6 border px-4 py-3 text-sm ${
+              darkMode
+                ? "border-red-400/30 bg-red-400/5 text-red-300"
+                : "border-red-200 bg-red-50 text-red-700"
+            }`}
+          >
+            {error}
           </div>
-        </main>
-      </div>
+        )}
+
+        <footer
+          className={`mt-16 pt-6 border-t flex flex-col sm:flex-row justify-between gap-4 text-sm ${
+            darkMode
+              ? "border-white/10 text-gray-500"
+              : "border-black/10 text-gray-500"
+          }`}
+        >
+          <p>AI Developer Toolbox</p>
+
+          <div className="flex gap-5">
+            <Link
+              to="/privacy"
+              className="hover:text-current hover:underline underline-offset-4"
+            >
+              Privacy
+            </Link>
+
+            <Link
+              to="/terms"
+              className="hover:text-current hover:underline underline-offset-4"
+            >
+              Terms
+            </Link>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 }

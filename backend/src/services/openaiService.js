@@ -3,7 +3,6 @@ import { env } from "../config/env.js";
 
 let openai = null;
 
-// Initialize OpenAI only if API key exists
 if (env.OPENAI_API_KEY) {
   openai = new OpenAI({
     apiKey: env.OPENAI_API_KEY,
@@ -11,21 +10,17 @@ if (env.OPENAI_API_KEY) {
 }
 
 export const generateAIResponse = async (prompt) => {
+  if (!openai) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+
   try {
-    // If OpenAI is not configured, use mock response
-    if (!openai) {
-      console.log("Using mock response because API key is missing.");
-
-      return getMockResponse(prompt);
-    }
-
     const completion = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       messages: [
         {
           role: "system",
-          content:
-            "You are a helpful AI software engineering assistant.",
+          content: "You are a helpful AI software engineering assistant.",
         },
         {
           role: "user",
@@ -35,68 +30,23 @@ export const generateAIResponse = async (prompt) => {
       max_tokens: 300,
     });
 
-    return completion.choices[0].message.content;
+    const response = completion?.choices?.[0]?.message?.content;
+
+    if (!response?.trim()) {
+      throw new Error("OpenAI returned an empty response");
+    }
+
+    return response;
   } catch (error) {
     console.error(
       "OpenAI Service Error:",
-      error.message || error
+      error?.status || "",
+      error?.message || error
     );
 
-    // Fallback if OpenAI fails
-    return getMockResponse(prompt);
+    // IMPORTANT:
+    // Do not return the mock here.
+    // Throw so AIService can try the next provider.
+    throw error;
   }
-};
-
-// Mock AI response fallback
-const getMockResponse = (prompt) => {
-  console.log("MOCK AI RESPONSE ACTIVE");
-
-  return `
-## Problem Analysis
-
-It looks like your issue may be related to:
-
-"${prompt}"
-
---------------------------------------------------
-
-## Possible Causes
-
-1. Infinite React render cycles
-2. Incorrect useEffect dependencies
-3. State updates triggering re-renders
-4. Improper API handling
-5. Async logic issues
-
---------------------------------------------------
-
-## Suggested Debugging Steps
-
-### Step 1 — Inspect Console Errors
-Carefully read browser console warnings and stack traces.
-
-### Step 2 — Verify State Updates
-Ensure state setters are not executing repeatedly.
-
-### Step 3 — Inspect useEffect
-Check dependency arrays carefully to avoid loops.
-
-### Step 4 — Add Logs
-Use console.log strategically to trace execution flow.
-
-### Step 5 — Isolate Components
-Simplify the component temporarily to locate the root issue.
-
---------------------------------------------------
-
-## Engineering Advice
-
-Strong engineers debug systematically:
-- isolate variables
-- test assumptions
-- simplify complexity
-- validate one layer at a time
-
-Avoid random guessing while debugging complex applications.
-`;
 };
