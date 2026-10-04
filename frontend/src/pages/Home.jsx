@@ -5,6 +5,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import PromptForm from "../components/PromptForm";
 import ResponseCard from "../components/ResponseCard";
 import { getAIResponse } from "../services/api";
+import heroImage from "../assets/hero.png";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -218,7 +219,7 @@ function Home() {
             }}
           >
             <motion.img
-              src="/src/assets/hero.png"
+              src={heroImage}
               alt="Developer workspace visualization"
               initial={{ scale: 1.06, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
