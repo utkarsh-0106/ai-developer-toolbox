@@ -53,7 +53,7 @@ function Home() {
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
+  const darkMode = true;
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("auth_user");
     return savedUser ? JSON.parse(savedUser) : null;
@@ -110,9 +110,7 @@ function Home() {
 
   return (
     <div
-      className={`min-h-screen ${
-        darkMode ? "bg-[#0b0d10] text-white" : "bg-[#f6f7f9] text-[#111318]"
-      }`}
+      className="ai-surface min-h-screen bg-[#08090b] text-white"
     >
       <header
         className={`border-b ${
@@ -120,18 +118,24 @@ function Home() {
             ? "border-white/10 bg-[#0b0d10]"
             : "border-black/10 bg-white"
         }`}
+      className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#08090b]/80 backdrop-blur-xl"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link to="/" className="text-lg font-semibold tracking-tight">
+          <Link
+            to="/"
+            className="group flex items-center gap-3 text-[15px] font-semibold tracking-tight"
+          >
+            <span className="flex h-7 w-7 items-center justify-center border border-white/15 bg-white/[0.04] text-[10px] font-mono text-white/80 transition-colors group-hover:border-white/30 group-hover:bg-white/[0.08]">
+              AI
+            </span>
             AI Developer Toolbox
+            <span>Developer Toolbox</span>
           </Link>
 
-          <nav className="flex items-center gap-5 text-sm">
+          <nav className="flex items-center gap-6 text-sm">
             <Link
               to="/history"
-              className={`hover:underline underline-offset-4 ${
-                darkMode ? "text-gray-300" : "text-gray-600"
-              }`}
+              className="text-white/55 transition-colors hover:text-white"
             >
               History
             </Link>
@@ -163,17 +167,6 @@ function Home() {
               />
             )}
 
-            <button
-              type="button"
-              onClick={() => setDarkMode((value) => !value)}
-              className={`border px-3 py-2 text-sm font-medium transition-colors ${
-                darkMode
-                  ? "border-white/15 text-gray-200 hover:bg-white/5"
-                  : "border-black/10 text-gray-700 hover:bg-black/[0.03]"
-              }`}
-            >
-              {darkMode ? "Light" : "Dark"}
-            </button>
           </nav>
         </div>
       </header>
@@ -181,105 +174,158 @@ function Home() {
       <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
         <motion.section
           ref={heroRef}
-          style={{ y: heroY, opacity: heroOpacity, scale: heroDepthOpacity }}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          className="grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-10 lg:gap-16 items-center mb-16"
+          style={{ y: heroY, opacity: heroOpacity }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
+          className={`relative min-h-[680px] lg:min-h-[760px] mb-20 overflow-hidden rounded-[2rem] border ${
+            darkMode
+              ? "border-white/10 bg-[#080a0d]"
+              : "border-black/[0.08] bg-[#e9ecef]"
+          }`}
+          onMouseMove={handleHeroMouseMove}
+          onMouseLeave={handleHeroMouseLeave}
         >
-          <div className="max-w-3xl">
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="text-xs font-semibold uppercase tracking-[0.18em] mb-4 text-gray-500"
-            >
-              Developer productivity
-            </motion.p>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.25 }}
-              className={`text-4xl md:text-5xl lg:text-6xl font-semibold tracking-[-0.04em] leading-[1.05] ${
-                darkMode ? "text-white" : "text-[#111318]"
-              }`}
-            >
-              Debug, explain, and review software problems.
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.35 }}
-              className={`mt-5 max-w-2xl text-base md:text-lg leading-7 ${
-                darkMode ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              A focused workspace for developers. Submit an error, coding
-              question, API problem, or engineering issue and get a structured
-              technical response.
-            </motion.p>
-          </div>
+          {/* Cinematic background */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              x: heroDepthX,
+              y: heroDepthY,
+              opacity: darkMode ? 1 : 0,
+              background: "radial-gradient(circle at 50% 42%, rgba(255,255,255,0.13), transparent 38%)",
+            }}
+          />
 
           <motion.div
-            initial={{ opacity: 0, x: 40, scale: 0.96 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.25, ease: "easeOut" }}
-            className="relative hero-visual"
-          >
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              style={{
-                x: smoothMouseX,
-                y: smoothMouseY,
-                rotateX: heroRotateX,
-                rotateY: heroRotateY,
-                scale: heroCameraScale,
-                transformPerspective: 900,
-              }}
-              onMouseMove={handleHeroMouseMove}
-              onMouseLeave={handleHeroMouseLeave}
-            >
-            <motion.div
-              className="pointer-events-none absolute -inset-12 z-0"
-              style={{
-                x: heroDepthX,
-                y: heroDepthY,
-                background: darkMode
-                  ? "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.07), transparent 55%)"
-                  : "radial-gradient(circle at 50% 50%, rgba(0,0,0,0.06), transparent 55%)",
-              }}
-            />
+            className="absolute inset-0 pointer-events-none z-[1]"
+            style={{
+              opacity: darkMode ? 1 : 0,
+              background: `radial-gradient(circle at ${heroLightX} ${heroLightY}, rgba(255,255,255,0.10), transparent 24%)`,
+            }}
+          />
 
-            <motion.div
-              className="pointer-events-none absolute z-0 h-56 w-56 rounded-full blur-3xl"
-              style={{
-                left: heroLightX,
-                top: heroLightY,
-                x: "-50%",
-                y: "-50%",
-                background: darkMode
-                  ? "radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%)"
-                  : "radial-gradient(circle, rgba(0,0,0,0.08), transparent 70%)",
-              }}
-            />
-            <div
-              className={`absolute inset-4 blur-3xl opacity-10 ${
-                darkMode ? "bg-white" : "bg-black"
-              }`}
-            />
-            <img
+          {/* Hero artwork */}
+          <motion.div
+            className="absolute inset-0 flex items-end justify-end p-5 md:p-8 lg:p-10"
+            style={{
+              x: smoothMouseX,
+              y: smoothMouseY,
+              rotateX: heroRotateX,
+              rotateY: heroRotateY,
+              scale: heroCameraScale,
+              transformPerspective: 1200,
+            }}
+          >
+            <motion.img
               src="/src/assets/hero.png"
               alt="Developer workspace visualization"
-              className="relative w-full h-auto object-cover"
+              initial={{ scale: 1.06, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.2, delay: 0.15, ease: "easeOut" }}
+              className="w-[78%] md:w-[72%] lg:w-[68%] h-auto object-cover rounded-[1.5rem] shadow-2xl translate-x-2 md:translate-x-6 lg:translate-x-10 translate-y-2 md:translate-y-4 lg:translate-y-6"
             />
-            </motion.div>
+          </motion.div>
+
+          {/* Editorial headline */}
+          <div className="relative z-10 flex min-h-[680px] lg:min-h-[760px] flex-col justify-between p-7 md:p-10 lg:p-14 pointer-events-none">
+            <div className="flex items-start justify-between">
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${
+                  darkMode ? "text-white/40" : "text-black/45"
+                }`}
+              >
+                Developer productivity
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.35 }}
+                className={`hidden md:block text-right ${
+                  darkMode ? "text-white/40" : "text-black/40"
+                }`}
+              >
+                <p className="text-[10px] uppercase tracking-[0.18em]">
+                  AI Developer Toolbox
+                </p>
+                <p className="mt-1 text-xs opacity-70">
+                  Debug / Explain / Review
+                </p>
+              </motion.div>
+            </div>
+
+            <div className="max-w-2xl pt-16 md:pt-20 lg:pt-24">
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className={`mb-5 text-xs uppercase tracking-[0.2em] ${
+                  darkMode ? "text-white/35" : "text-black/40"
+                }`}
+              >
+                Engineering intelligence
+              </motion.p>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 35 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.9, delay: 0.4, ease: "easeOut" }}
+                className={`max-w-3xl text-[clamp(3.2rem,7vw,7rem)] font-semibold leading-[0.88] tracking-[-0.065em] ${
+                  darkMode ? "text-white" : "text-[#111318]"
+                }`}
+              >
+                Debug,
+                <br />
+                explain,
+                <br />
+                review.
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.55 }}
+                className={`mt-7 max-w-md text-sm md:text-base leading-7 ${
+                  darkMode ? "text-white/50" : "text-black/55"
+                }`}
+              >
+                A focused workspace for developers. Submit an error, coding
+                question, API problem, or engineering issue and get a
+                structured technical response.
+              </motion.p>
+            </div>
+          </div>
+
+          {/* Glass information card */}
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.7 }}
+            className={`absolute bottom-7 right-7 z-20 hidden w-64 rounded-2xl border p-5 shadow-xl backdrop-blur-xl md:block ${
+              darkMode
+                ? "border-white/15 bg-white/[0.06]"
+                : "border-black/[0.08] bg-white/55"
+            }`}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <span className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
+                darkMode ? "text-white/40" : "text-black/45"
+              }`}>
+                Workspace
+              </span>
+              <span className={`h-2 w-2 rounded-full ${
+                  darkMode ? "bg-white/70" : "bg-black/70"
+                }`} />
+            </div>
+            <p className={`text-sm font-medium leading-6 ${
+                darkMode ? "text-white/70" : "text-black/75"
+              }`}>
+              Turn complex software problems into clear technical answers.
+            </p>
           </motion.div>
         </motion.section>
 

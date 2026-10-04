@@ -80,24 +80,50 @@ function PromptForm({ onSubmit, loading, darkMode }) {
               Quick prompts
             </p>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px border border-black/10 dark:border-white/10 bg-black/10 dark:bg-white/10">
               {[
-                "Debug React error",
-                "Explain this code",
-                "Optimize SQL query",
-                "Review my API",
-              ].map((item) => (
+                ["01", "Debug React error"],
+                ["02", "Explain this code"],
+                ["03", "Optimize SQL query"],
+                ["04", "Review my API"],
+              ].map(([number, item]) => (
                 <button
                   key={item}
                   type="button"
                   onClick={() => setQuickPrompt(item)}
-                  className={`border px-3 py-2 text-sm transition-colors ${
+                  className={`group relative flex items-center justify-between overflow-hidden px-3.5 py-3 text-left text-xs font-medium transition-all duration-300 ${
                     darkMode
-                      ? "border-white/10 text-gray-300 hover:bg-white/5"
-                      : "border-black/10 text-gray-700 hover:bg-black/[0.03]"
+                      ? "bg-[#0b0d10] text-gray-300 hover:bg-white/[0.07] hover:text-white"
+                      : "bg-white text-gray-700 hover:bg-[#f4f5f6] hover:text-black"
                   }`}
                 >
-                  {item}
+                  <span
+                    className={`relative z-10 mr-4 text-[9px] font-semibold tracking-[0.18em] transition-colors ${
+                      darkMode
+                        ? "text-white/25 group-hover:text-white/60"
+                        : "text-black/25 group-hover:text-black/60"
+                    }`}
+                  >
+                    {number}
+                  </span>
+
+                  <span className="relative z-10 flex-1">
+                    {item}
+                  </span>
+
+                  <span
+                    className={`relative z-10 ml-3 text-sm transition-transform duration-300 group-hover:translate-x-0.5 ${
+                      darkMode ? "text-white/25" : "text-black/25"
+                    }`}
+                  >
+                    ↗
+                  </span>
+
+                  <span
+                    className={`absolute inset-y-0 left-0 w-px origin-bottom scale-y-0 transition-transform duration-300 group-hover:scale-y-100 ${
+                      darkMode ? "bg-white/70" : "bg-black/70"
+                    }`}
+                  />
                 </button>
               ))}
             </div>
