@@ -1,1 +1,14 @@
 .env
+.vercel
+
+# Local/generated files
+.DS_Store
+backend/.auth-backup/
+backend/node_modules/
+frontend/node_modules/
+
+# Local/generated files
+.DS_Store
+backend/.auth-backup/
+backend/node_modules/
+frontend/node_modules/

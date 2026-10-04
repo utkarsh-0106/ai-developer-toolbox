@@ -10,6 +10,8 @@ dotenv.config({
 });
 
 export const env = {
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  JWT_SECRET: process.env.JWT_SECRET,
   PORT: process.env.PORT,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4.1-mini",
