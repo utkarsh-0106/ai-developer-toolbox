@@ -1,0 +1,23 @@
+.env
+.vercel
+
+# Local/generated files
+.DS_Store
+backend/.auth-backup/
+backend/node_modules/
+frontend/node_modules/
+
+# Local/generated files
+.DS_Store
+backend/.auth-backup/
+backend/node_modules/
+frontend/node_modules/
+.env.*
+node_modules/
+dist/
+frontend_ui_backup_20261003_154126/
+
+# Local frontend backup files
+frontend/src/*.backup
+frontend/src/*.readability-backup
+frontend/src/pages/*.before-*
