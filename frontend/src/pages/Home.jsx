@@ -146,7 +146,7 @@ function Home() {
         <section id="workspace" className="adt-workspace-grid"><div><div className="adt-section-title"><span>AI Workspace</span><small>General engineering assistance</small></div><PromptForm onSubmit={generalAsk} loading={generalLoading} darkMode={true}/></div><div><div className="adt-section-title"><span>AI Response</span><small>General-purpose reasoning</small></div><ResponseCard response={generalResponse} darkMode={true}/></div></section>
 
 
-        <footer className="adt-footer"><span>AI Developer Toolbox · AI Engineering Platform</span><div><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link></div></footer>
+        <footer className="adt-footer"><span>AI Developer Toolbox · AI Engineering Platform</span></footer>
       </main>
     </div>
   </div>;

@@ -1,130 +1,101 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getHistory, deleteHistoryItem } from "../services/api";
+import "./history.css";
 
 function History() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [expanded, setExpanded] = useState({});
 
   useEffect(() => {
+    let active = true;
     const fetchHistory = async () => {
       try {
         const data = await getHistory();
-        setHistory(data);
+        if (active) setHistory(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to fetch history:", err);
-        setError("Failed to load prompt history.");
+        if (active) setError("Failed to load prompt history. Please try again in a moment.");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
-
     fetchHistory();
+    return () => { active = false; };
   }, []);
+
+  const filteredHistory = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return history;
+    return history.filter((item) => `${item.question || ""} ${item.response || ""}`.toLowerCase().includes(term));
+  }, [history, search]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this prompt?")) return;
-
     try {
       await deleteHistoryItem(id);
       setHistory((items) => items.filter((item) => item._id !== id));
     } catch (err) {
       console.error("Delete failed:", err);
+      setError("Could not delete this entry. Please try again.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9] text-[#111318]">
-      <header className="border-b border-black/10 bg-white">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="font-semibold tracking-tight">
-            AI Developer Toolbox
-          </Link>
-
-          <Link
-            to="/"
-            className="text-sm text-gray-600 hover:text-black hover:underline underline-offset-4"
-          >
-            Back to workspace
-          </Link>
+    <div className="history-page">
+      <div className="history-ambient" aria-hidden="true" />
+      <header className="history-header">
+        <div className="history-header-inner">
+          <Link to="/" className="history-brand"><span className="history-brand-mark">✦</span><span>AI DEVELOPER TOOLBOX</span></Link>
+          <div className="history-header-right"><span className="history-status"><i /> WORKSPACE</span><Link to="/" className="history-back">← <span>Back to workspace</span></Link></div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-12">
-        <div className="mb-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 mb-3">
-            Workspace
-          </p>
-
-          <h1 className="text-4xl font-semibold tracking-[-0.03em]">
-            Prompt history
-          </h1>
-
-          <p className="mt-3 text-gray-600">
-            Previously submitted developer questions and responses.
-          </p>
-        </div>
-
-        {loading && (
-          <div className="border border-black/10 bg-white p-6 text-gray-500">
-            Loading history...
+      <main className="history-main">
+        <section className="history-intro">
+          <div className="history-eyebrow"><span /> YOUR ACTIVITY</div>
+          <h1 data-guide="history-title">Prompt <em>history</em></h1>
+          <p>Revisit previous questions and AI responses, pick up where you left off, and keep your engineering work organized.</p>
+          <div className="history-stats" aria-label="History summary">
+            <div className="history-stat"><span className="history-stat-icon">↻</span><div><strong>{history.length}</strong><small>Total entries</small></div></div>
+            <div className="history-stat"><span className="history-stat-icon">⌕</span><div><strong>{filteredHistory.length}</strong><small>{search ? "Matching entries" : "Visible entries"}</small></div></div>
+            <div className="history-stat"><span className="history-stat-icon">✧</span><div><strong>AI</strong><small>Workspace archive</small></div></div>
           </div>
-        )}
+        </section>
 
-        {error && (
-          <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
+        <section className="history-content" aria-label="Saved prompts">
+          <div className="history-toolbar">
+            <label className="history-search"><span aria-hidden="true">⌕</span><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search prompts and responses..." aria-label="Search prompt history" /></label>
+            <span className="history-count">{filteredHistory.length} {filteredHistory.length === 1 ? "ENTRY" : "ENTRIES"}</span>
           </div>
-        )}
 
-        {!loading && !error && history.length === 0 && (
-          <div className="border border-black/10 bg-white p-10 text-center">
-            <h2 className="font-semibold">No history yet</h2>
-            <p className="mt-2 text-sm text-gray-500">
-              Your submitted prompts will appear here.
-            </p>
+          {loading && <div className="history-state"><span className="history-loader" /><h2>Loading your history</h2><p>Retrieving saved prompts and responses…</p></div>}
+          {error && <div className="history-error" role="alert"><strong>Something went wrong</strong><p>{error}</p><button type="button" onClick={() => window.location.reload()}>Reload history</button></div>}
+          {!loading && !error && filteredHistory.length === 0 && (
+            <div className="history-state history-empty"><span className="history-empty-icon">⌁</span><h2>{search ? "No matching entries" : "Your history starts here"}</h2><p>{search ? "Try a different keyword to find a saved prompt." : "Questions you submit in the AI Workspace will appear here, ready to revisit whenever you need them."}</p>{search && <button type="button" onClick={() => setSearch("")}>Clear search</button>}{!search && <Link to="/" className="history-primary-link">Go to AI Workspace <span>→</span></Link>}</div>
+          )}
+
+          <div className="history-list">
+            {filteredHistory.map((item, index) => {
+              const isExpanded = Boolean(expanded[item._id]);
+              return (
+                <article className="history-card" key={item._id}>
+                  <div className="history-card-icon" aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
+                  <div className="history-card-body">
+                    <div className="history-card-meta"><span>AI WORKSPACE</span><span className="history-dot" /> <span>SESSION {String(index + 1).padStart(2, "0")}</span></div>
+                    <h2>{item.question || "Untitled prompt"}</h2>
+                    <div className={`history-response${isExpanded ? " is-expanded" : ""}`}><p className="history-response-label">AI RESPONSE</p><pre>{item.response || "No response was saved for this entry."}</pre></div>
+                    <div className="history-card-actions"><button type="button" className="history-expand" onClick={() => setExpanded((current) => ({ ...current, [item._id]: !current[item._id] }))}>{isExpanded ? "Collapse response" : "View full response"} <span>{isExpanded ? "↑" : "↓"}</span></button><button type="button" className="history-delete" onClick={() => handleDelete(item._id)} aria-label={`Delete prompt: ${item.question || "Untitled prompt"}`}>⌫ <span>Delete</span></button></div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-        )}
-
-        <div className="space-y-4">
-          {history.map((item) => (
-            <article
-              key={item._id}
-              className="border border-black/10 bg-white"
-            >
-              <div className="p-6">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                  Prompt
-                </p>
-
-                <h2 className="mt-2 text-base font-semibold leading-6">
-                  {item.question}
-                </h2>
-
-                <div className="mt-5 pt-5 border-t border-black/10">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                    Response
-                  </p>
-
-                  <pre className="mt-3 whitespace-pre-wrap font-sans text-sm leading-6 text-gray-700">
-                    {item.response}
-                  </pre>
-                </div>
-
-                <div className="mt-5 pt-5 border-t border-black/10">
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(item._id)}
-                    className="border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+        </section>
+        <footer className="history-footer"><span><i /> AI SYSTEMS ONLINE</span><span>AI DEVELOPER TOOLBOX <b>·</b> HISTORY</span></footer>
       </main>
     </div>
   );

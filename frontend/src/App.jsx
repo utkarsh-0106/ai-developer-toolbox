@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import History from "./components/History";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
+import SiteGuide from "./components/SiteGuide";
 
 function App() {
   return (
@@ -10,9 +9,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/history" element={<History />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
       </Routes>
+      <SiteGuide />
     </BrowserRouter>
   );
 }
