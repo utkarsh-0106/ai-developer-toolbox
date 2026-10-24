@@ -33,6 +33,7 @@ async function saveRepositoryIndex(userId, ingestionResult) {
         url: repository.htmlUrl,
         defaultBranch: repository.defaultBranch,
         description: repository.description,
+        private: Boolean(repository.private),
         language: repository.language,
         lastIndexedCommitSha: tree.sha,
         lastIndexedAt: new Date(),

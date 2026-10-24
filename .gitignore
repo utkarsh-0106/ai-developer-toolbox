@@ -21,3 +21,18 @@ frontend_ui_backup_20261003_154126/
 frontend/src/*.backup
 frontend/src/*.readability-backup
 frontend/src/pages/*.before-*
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Dependencies and generated files
+node_modules/
+**/node_modules/
+dist/
+coverage/
+.DS_Store

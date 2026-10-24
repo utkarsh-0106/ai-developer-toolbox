@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import RepositoryChunk from "../models/RepositoryChunk.js";
 import Repository from "../models/Repository.js";
+import { GitHubConnection } from "../models/Integration.js";
+import { decryptSecret } from "./secretCrypto.js";
 
 const STOP_WORDS = new Set([
   "the", "and", "for", "that", "this", "with", "from", "what", "when",
@@ -93,6 +95,17 @@ async function retrieveRepositoryChunks({
 
   if (repository.indexingStatus !== "ready") {
     throw new Error("Repository is not ready for questions");
+  }
+  if (repository.private) {
+    const connection = await GitHubConnection.findOne({ userId, githubUserId: { $exists: true } });
+    if (!connection) throw new Error("Private repository access is no longer connected");
+    try {
+      const token = decryptSecret(connection.encryptedToken);
+      const response = await fetch(`https://api.github.com/repos/${encodeURIComponent(repository.owner)}/${encodeURIComponent(repository.name)}`, { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "AI-Developer-Toolbox" } });
+      if (!response.ok) throw new Error("Private repository access could not be verified");
+    } catch {
+      throw new Error("Private repository access is no longer authorized. Reconnect GitHub and verify repository permissions.");
+    }
   }
 
   const terms = extractSearchTerms(question);

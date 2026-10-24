@@ -13,7 +13,7 @@ export function parseGitHubRepositoryUrl(repositoryUrl) {
     throw new Error("Invalid GitHub repository URL");
   }
 
-  if (url.protocol !== "https:" || url.hostname !== "github.com") {
+  if (url.protocol !== "https:" || url.hostname !== "github.com" || url.port || url.username || url.password || url.search || url.hash) {
     throw new Error("URL must be a valid github.com repository URL");
   }
 
@@ -21,22 +21,29 @@ export function parseGitHubRepositoryUrl(repositoryUrl) {
     .split("/")
     .filter(Boolean);
 
-  if (parts.length < 2) {
+  if (parts.length !== 2) {
     throw new Error("Invalid GitHub repository URL");
   }
 
   const owner = parts[0];
   const repo = parts[1].replace(/\.git$/, "");
-
-  if (!owner || !repo) {
+  if (!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(owner) || !/^[A-Za-z0-9_.-]+$/.test(repo) || repo === "." || repo === "..") {
     throw new Error("Invalid GitHub repository URL");
   }
 
   return { owner, repo };
 }
 
-export async function getPublicRepository(repositoryUrl) {
+export async function getPublicRepository(repositoryUrl, token = null) {
   const { owner, repo } = parseGitHubRepositoryUrl(repositoryUrl);
+  if (token) {
+    const response = await fetch(`${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`, { headers: { Accept: "application/vnd.github+json", Authorization: `Bearer ${token}`, "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "AI-Developer-Toolbox" } });
+    if (response.status === 404) throw new Error("GitHub repository not found or not accessible to the connected account");
+    if (response.status === 401 || response.status === 403) throw new Error("GitHub authorization failed or API rate limit exceeded");
+    if (!response.ok) throw new Error("Failed to retrieve GitHub repository");
+    const data = await response.json();
+    return { id: String(data.id), owner: data.owner.login, name: data.name, fullName: data.full_name, description: data.description, private: Boolean(data.private), defaultBranch: data.default_branch, language: data.language, htmlUrl: data.html_url, title: data.full_name };
+  }
 
   const githubRepositoryUrl = `https://github.com/${owner}/${repo}`;
 
@@ -83,7 +90,7 @@ export async function getPublicRepository(repositoryUrl) {
   };
 }
 
-export async function getPublicRepositoryTree(owner, repo, branch) {
+export async function getPublicRepositoryTree(owner, repo, branch, token = null) {
   if (!owner || !repo || !branch) {
     throw new Error("Repository owner, name, and branch are required");
   }
@@ -92,9 +99,13 @@ export async function getPublicRepositoryTree(owner, repo, branch) {
     `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
     {
       headers: {
-        Accept: "application/vnd.github+json",
-        "User-Agent": "AI-Developer-Toolbox",
-      },
+          Accept: "application/vnd.github+json",
+          "User-Agent": "AI-Developer-Toolbox",
+          ...(token ? {
+            Authorization: `Bearer ${token}`,
+            "X-GitHub-Api-Version": "2022-11-28",
+          } : {}),
+        },
     }
   );
 
@@ -128,16 +139,50 @@ export async function getPublicRepositoryTree(owner, repo, branch) {
   };
 }
 
+export async function getRepositoryCommitSha(owner, repo, branch, token = null) {
+  if (!owner || !repo || !branch || !token) {
+    throw new Error("Repository owner, name, branch, and GitHub token are required");
+  }
+
+  const response = await fetch(
+    `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${encodeURIComponent(branch)}`,
+    {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "AI-Developer-Toolbox",
+      },
+    }
+  );
+
+  if (response.status === 404) {
+    throw new Error("GitHub commit not found or not accessible to the connected account");
+  }
+  if ([401, 403, 429].includes(response.status)) {
+    throw new Error("GitHub authorization failed or API rate limit exceeded");
+  }
+  if (!response.ok) throw new Error("Failed to retrieve GitHub repository commit");
+
+  const data = await response.json();
+  if (!data?.sha) throw new Error("GitHub repository commit SHA could not be determined");
+  return data.sha;
+}
+
 const FILE_FETCH_CONCURRENCY = 5;
 
-async function getRepositoryBlob(owner, repo, sha) {
+async function getRepositoryBlob(owner, repo, sha, token = null) {
   const response = await fetch(
     `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/blobs/${encodeURIComponent(sha)}`,
     {
       headers: {
-        Accept: "application/vnd.github+json",
-        "User-Agent": "AI-Developer-Toolbox",
-      },
+          Accept: "application/vnd.github+json",
+          "User-Agent": "AI-Developer-Toolbox",
+          ...(token ? {
+            Authorization: `Bearer ${token}`,
+            "X-GitHub-Api-Version": "2022-11-28",
+          } : {}),
+        },
     }
   );
 
@@ -184,7 +229,7 @@ async function mapWithConcurrency(items, worker, concurrency) {
   return results;
 }
 
-export async function getRepositoryFileContents(owner, repo, files) {
+export async function getRepositoryFileContents(owner, repo, files, token = null) {
   if (!owner || !repo) {
     throw new Error("Repository owner and name are required");
   }
@@ -201,7 +246,7 @@ export async function getRepositoryFileContents(owner, repo, files) {
       }
 
       try {
-        const blob = await getRepositoryBlob(owner, repo, file.sha);
+        const blob = await getRepositoryBlob(owner, repo, file.sha, token);
 
         if (blob.encoding !== "base64" || typeof blob.content !== "string") {
           return null;
@@ -231,46 +276,47 @@ export async function getRepositoryFileContents(owner, repo, files) {
 }
 
 
-export async function downloadPublicRepositoryArchive(owner, repo, branch) {
+export async function downloadPublicRepositoryArchive(owner, repo, branch, token = null) {
   if (!owner || !repo || !branch) {
     throw new Error("Repository owner, name, and branch are required");
   }
 
-  const archiveUrl =
-    `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
-    `/archive/refs/heads/${encodeURIComponent(branch)}.tar.gz`;
+  const archiveUrl = token
+    ? `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/tarball/${encodeURIComponent(branch)}`
+    : `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/archive/refs/heads/${encodeURIComponent(branch)}.tar.gz`;
 
   const response = await fetch(archiveUrl, {
-    headers: {
-      "User-Agent": "AI-Developer-Toolbox",
-    },
+    headers: { "User-Agent": "AI-Developer-Toolbox", ...(token ? { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" } : {}) },
     redirect: "follow",
   });
 
   if (!response.ok) {
-    throw new Error("Failed to download GitHub repository archive");
+    const error = new Error(
+      `Failed to download GitHub repository archive (HTTP ${response.status})`
+    );
+    error.status = response.status;
+    error.contentType = response.headers.get("content-type");
+    throw error;
   }
 
   const archiveBuffer = Buffer.from(await response.arrayBuffer());
   const etag = response.headers.get("etag");
 
-  const commitsUrl =
-    `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
-    `/commits/${encodeURIComponent(branch)}`;
+  const commitsUrl = token
+    ? `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${encodeURIComponent(branch)}`
+    : `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${encodeURIComponent(branch)}`;
 
   const commitsResponse = await fetch(commitsUrl, {
-    headers: {
-      "User-Agent": "AI-Developer-Toolbox",
-    },
+    headers: { "User-Agent": "AI-Developer-Toolbox", ...(token ? { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" } : {}) },
   });
 
   if (!commitsResponse.ok) {
     throw new Error("Failed to retrieve GitHub repository commit");
   }
 
-  const commitsHtml = await commitsResponse.text();
-  const commitSha =
-    commitsHtml.match(/[0-9a-f]{40}/)?.[0] || null;
+  let commitSha;
+  if (token) { const commit = await commitsResponse.json(); commitSha = commit?.sha || null; }
+  else { const commitsHtml = await commitsResponse.text(); commitSha = commitsHtml.match(/[0-9a-f]{40}/)?.[0] || null; }
 
   if (!commitSha) {
     throw new Error("GitHub repository commit SHA could not be determined");
@@ -278,7 +324,6 @@ export async function downloadPublicRepositoryArchive(owner, repo, branch) {
 
   return {
     archiveBuffer,
-    archiveUrl,
     etag,
     commitSha,
   };

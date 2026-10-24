@@ -2,7 +2,7 @@ import express from "express";
 import {
   getPublicRepositoryMetadata,
 } from "../controllers/githubController.js";
-import { indexPublicRepository } from "../controllers/repositoryController.js";
+import { indexPublicRepository, indexConnectedRepository } from "../controllers/repositoryController.js";
 import requireAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -14,5 +14,6 @@ router.post(
   requireAuth,
   indexPublicRepository
 );
+router.post("/index-connected", requireAuth, indexConnectedRepository);
 
 export default router;

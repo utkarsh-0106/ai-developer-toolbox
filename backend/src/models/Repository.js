@@ -43,6 +43,8 @@ const repositorySchema = new mongoose.Schema(
       required: true,
     },
 
+    private: { type: Boolean, default: false, index: true },
+
     description: {
       type: String,
       default: null,

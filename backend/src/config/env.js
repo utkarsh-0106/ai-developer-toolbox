@@ -23,5 +23,10 @@ export const env = {
   GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-3.8-flash",
   GROQ_MODEL: process.env.GROQ_MODEL || "llama-3.1-70b-versatile",
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-  GROQ_API_KEY: process.env.GROQ_API_KEY
+  GROQ_API_KEY: process.env.GROQ_API_KEY,
+  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+  GITHUB_CALLBACK_URL: process.env.GITHUB_CALLBACK_URL,
+  INTEGRATION_ENCRYPTION_KEY: process.env.INTEGRATION_ENCRYPTION_KEY,
+  FRONTEND_ORIGIN: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
 };

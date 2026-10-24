@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes.js";
 import githubRoutes from "./routes/githubRoutes.js";
 import repositoryRoutes from "./routes/repositoryRoutes.js";
 import repositoryIntelligenceRoutes from "./routes/repositoryIntelligenceRoutes.js";
+import integrationRoutes from "./routes/integrationRoutes.js";
 import connectDB from "./config/db.js";
 
 const app = express();
@@ -43,6 +44,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/github", githubRoutes);
 app.use("/api/repository", repositoryRoutes);
 app.use("/api/repository-intelligence", repositoryIntelligenceRoutes);
+app.use("/api/integrations", integrationRoutes);
 
 // Health Check Route
 app.get("/health", (req, res) => {

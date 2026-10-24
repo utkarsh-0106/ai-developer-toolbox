@@ -1,36 +1,6 @@
-services:
-  - type: web
-    name: ai-developer-toolbox-api
-    runtime: node
-    rootDir: backend
-    buildCommand: npm ci
-    startCommand: npm start
-    healthCheckPath: /health
+import mongoose from "mongoose";
+const githubConnectionSchema = new mongoose.Schema({ userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true, index: true }, githubUserId: { type: String, required: true }, login: { type: String, required: true }, encryptedToken: { type: String, required: true } }, { timestamps: true });
+export const GitHubConnection = mongoose.model("GitHubConnection", githubConnectionSchema);
 
-    envVars:
-      - key: NODE_ENV
-        value: production
-
-      - key: AI_PROVIDER
-        value: gemini
-
-      - key: GEMINI_MODEL
-        value: gemini-3.8-flash
-
-      - key: AI_FALLBACK_PROVIDERS
-        value: ""
-
-      - key: MONGO_URI
-        sync: false
-
-      - key: GEMINI_API_KEY
-        sync: false
-
-      - key: JWT_SECRET
-        sync: false
-
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-
-      - key: FRONTEND_ORIGIN
-        sync: false
+const oauthStateSchema = new mongoose.Schema({ stateHash: { type: String, required: true, unique: true }, userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, expiresAt: { type: Date, required: true, expires: 0 } });
+export const GitHubOAuthState = mongoose.model("GitHubOAuthState", oauthStateSchema);

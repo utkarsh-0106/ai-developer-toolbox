@@ -5,11 +5,10 @@ import { Link } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import PromptForm from "../components/PromptForm";
 import ResponseCard from "../components/ResponseCard";
+import IntegrationsPanel from "../components/IntegrationsPanel";
 import {
   getAIResponse, getGitHubRepositoryMetadata, indexGitHubRepository, askRepositoryQuestion,
-  getRepositoryTree, getRepositoryFile, analyzeRepository, runRepositoryAgent, runCodeReview,
-  runDebugging, runSecurityScan, generateTests, reviewDiff, searchRepository, getRagTelemetry,
-  evaluateRetrieval,
+  getRepositoryTree, getRepositoryFile, analyzeRepository, getRagTelemetry
 } from "../services/api";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
@@ -57,22 +56,7 @@ function Home() {
   const [selectedPath, setSelectedPath] = useState("");
   const [file, setFile] = useState(null);
   const [overview, setOverview] = useState("");
-  const [agentQuestion, setAgentQuestion] = useState("");
-  const [agentResult, setAgentResult] = useState("");
-  const [reviewCode, setReviewCode] = useState("");
-  const [reviewResult, setReviewResult] = useState("");
-  const [debugError, setDebugError] = useState("");
-  const [debugCode, setDebugCode] = useState("");
-  const [debugResult, setDebugResult] = useState("");
-  const [securityResult, setSecurityResult] = useState("");
-  const [testResult, setTestResult] = useState("");
-  const [diff, setDiff] = useState("");
-  const [diffResult, setDiffResult] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
   const [telemetry, setTelemetry] = useState(null);
-  const [evalInput, setEvalInput] = useState('[{"question":"How does authentication work?","expectedPaths":["backend/src/controllers/authController.js"]}]');
-  const [evalResult, setEvalResult] = useState(null);
   const [generalResponse, setGeneralResponse] = useState("");
   const [generalLoading, setGeneralLoading] = useState(false);
 
@@ -84,23 +68,37 @@ function Home() {
   const preview = () => run("preview", async () => setMetadata((await getGitHubRepositoryMetadata(repositoryUrl.trim())).repository));
   const index = () => run("index", async () => setRepo(await indexGitHubRepository(repositoryUrl.trim())));
 
-  const loadRepository = async (r) => {
-    const id = r?.repository?.id; if (!id) return;
-    try { const t = await getRepositoryTree(id); setTree(t); if (t.files?.[0]) { setSelectedPath(t.files[0]); setFile(await getRepositoryFile(id, t.files[0])); } setTelemetry(await getRagTelemetry(id)); } catch (e) { setError(e.message); }
-  };
-  useEffect(() => { if (repo) loadRepository(repo); }, [repo]);
+  useEffect(() => {
+    const id = repo?.repository?.id;
+    if (!id) return;
+
+    let cancelled = false;
+
+    getRepositoryTree(id)
+      .then(async (t) => {
+        if (cancelled) return;
+        setTree(t);
+
+        if (t.files?.[0]) {
+          setSelectedPath(t.files[0]);
+          const nextFile = await getRepositoryFile(id, t.files[0]);
+          if (!cancelled) setFile(nextFile);
+        }
+
+        const nextTelemetry = await getRagTelemetry(id);
+        if (!cancelled) setTelemetry(nextTelemetry);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message);
+      });
+
+    return () => { cancelled = true; };
+  }, [repo]);
+  useEffect(() => { const onIndexed = (event) => { setRepo(event.detail); setError(""); }; window.addEventListener("adt:repository-indexed", onIndexed); return () => window.removeEventListener("adt:repository-indexed", onIndexed); }, []);
 
   const ask = (e) => { e.preventDefault(); if (!requireRepo() || !question.trim()) return; run("qa", async () => { const r = await askRepositoryQuestion(repo.repository.id, question.trim()); setAnswer(r.response); setSources(r.sources || []); setTab("AI Chat"); }); };
   const selectFile = (path) => run("file", async () => { setSelectedPath(path); setFile(await getRepositoryFile(repo.repository.id, path)); setTab("Files"); });
   const analyze = () => run("analyze", async () => { const r = await analyzeRepository(repo.repository.id); setOverview(r.analysis); setSources(r.sources || []); setTab("Overview"); });
-  const agent = (e) => { e.preventDefault(); if (!requireRepo() || !agentQuestion.trim()) return; run("agent", async () => setAgentResult((await runRepositoryAgent(repo.repository.id, agentQuestion)).response)); };
-  const codeReview = () => { if (!requireRepo() || !reviewCode.trim()) return; run("review", async () => setReviewResult((await runCodeReview(repo.repository.id, reviewCode, "auto-detect")).review)); };
-  const debug = () => { if (!requireRepo() || !debugError.trim()) return; run("debug", async () => setDebugResult((await runDebugging(repo.repository.id, debugError, debugCode)).investigation)); };
-  const security = () => { if (!requireRepo()) return; run("security", async () => setSecurityResult((await runSecurityScan(repo.repository.id)).report)); };
-  const tests = () => { if (!requireRepo() || !selectedPath) return; run("tests", async () => setTestResult((await generateTests(repo.repository.id, selectedPath)).tests)); };
-  const diffReview = () => { if (!requireRepo() || !diff.trim()) return; run("diff", async () => setDiffResult((await reviewDiff(repo.repository.id, diff)).review)); };
-  const search = () => { if (!requireRepo() || !searchQuery.trim()) return; run("search", async () => setSearchResults((await searchRepository(repo.repository.id, searchQuery)).results || [])); };
-  const evaluate = () => { if (!requireRepo()) return; run("evaluate", async () => setEvalResult(await evaluateRetrieval(repo.repository.id, JSON.parse(evalInput)))); };
   const generalAsk = async (prompt) => { try { setGeneralLoading(true); setError(""); setGeneralResponse((await getAIResponse(prompt)).response); } catch (e) { setError(e.message); } finally { setGeneralLoading(false); } };
 
   const nav = [
@@ -120,6 +118,7 @@ function Home() {
     <div className="adt-layout">
       <aside className="adt-sidebar"><nav>{nav.map(([label, icon, href]) => <a key={label} href={href} className="adt-nav-item"><Icon name={icon} size={17}/><span>{label}</span></a>)}<Link to="/history" className="adt-nav-item"><Icon name="history" size={17}/><span>History</span></Link></nav><div className="adt-sidebar-footer"><span className="adt-status-dot"/> AI systems online</div></aside>
       <main className="adt-main">
+        <IntegrationsPanel />
         <section id="home" className="adt-hero"><div><span className="adt-eyebrow">AI engineering platform</span><h1>Understand, review,<br/><span>debug your codebase.</span></h1><p>Understand your codebase with repository-grounded AI, intelligent code exploration and contextual answers.</p></div><div className="adt-hero-orbit"><div className="adt-orbit-core"><Icon name="graph" size={28}/></div><div className="adt-orbit-ring ring-a"/><div className="adt-orbit-ring ring-b"/></div></section>
 
         <section id="repository" className="adt-panel adt-repository-panel">

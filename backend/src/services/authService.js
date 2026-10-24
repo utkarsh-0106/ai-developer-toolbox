@@ -62,6 +62,7 @@ export const verifyGoogleCredential = async (credential) => {
         picture: user.picture,
       },
     };
+  
   } catch (error) {
     if (
       error?.code === "MISSING_GOOGLE_CREDENTIAL" ||
@@ -70,8 +71,16 @@ export const verifyGoogleCredential = async (credential) => {
       throw error;
     }
 
+    // Log the actual verification failure, never the credential/token.
+    console.error("Google token verification failed:", {
+      name: error?.name,
+      code: error?.code,
+      message: error?.message,
+    });
+
     const authError = new Error("Invalid Google credential");
     authError.code = "INVALID_GOOGLE_TOKEN";
     throw authError;
   }
 };
+

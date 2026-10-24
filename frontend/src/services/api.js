@@ -49,3 +49,10 @@ export const reviewDiff = (id, diff) => intelligence(id, "/diff-review", { metho
 export const searchRepository = (id, query, limit = 10) => intelligence(id, "/search", { method: "POST", body: JSON.stringify({ query, limit }) });
 export const getRagTelemetry = (id) => intelligence(id, "/telemetry");
 export const evaluateRetrieval = (id, cases) => intelligence(id, "/evaluate", { method: "POST", body: JSON.stringify({ cases }) });
+
+export const startGitHubConnection = () => request(`${API_BASE_URL}/api/integrations/github/start`, { method: "POST", headers: authHeaders(), body: JSON.stringify({}) });
+export const getGitHubConnection = () => request(`${API_BASE_URL}/api/integrations/github/status`, { headers: authHeaders() });
+export const getConnectedGitHubRepositories = () => request(`${API_BASE_URL}/api/integrations/github/repositories`, { headers: authHeaders() });
+export const disconnectGitHub = () => request(`${API_BASE_URL}/api/integrations/github`, { method: "DELETE", headers: authHeaders() });
+
+export const indexConnectedGitHubRepository = (repositoryUrl) => request(`${API_BASE_URL}/api/github/index-connected`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ repositoryUrl }) });

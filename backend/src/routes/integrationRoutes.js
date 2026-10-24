@@ -1,0 +1,11 @@
+import express from "express";
+import requireAuth from "../middleware/authMiddleware.js";
+import { githubStart, githubCallback, githubStatus, githubDisconnect, githubRepositories } from "../controllers/integrationController.js";
+const router = express.Router();
+router.get("/github/callback", githubCallback);
+router.use(requireAuth);
+router.post("/github/start", githubStart);
+router.get("/github/status", githubStatus);
+router.get("/github/repositories", githubRepositories);
+router.delete("/github", githubDisconnect);
+export default router;
